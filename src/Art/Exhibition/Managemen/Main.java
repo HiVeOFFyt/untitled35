@@ -6,10 +6,14 @@ public class Main {
         Artist kasteev = new Artist("Abilkhan Kasteev", "Realism");
         repo.addArtist(kasteev);
 
+        Artist van_gogh = new Artist("Van gogh", "post-Impressionism");
+        repo.addArtist(van_gogh);
+
         System.out.println("--- Current Artworks in DB ---");
         repo.showAllArtworks();
 
-        repo.updateArtworkYear("Turk-Sib", 1970);
+        repo.updateArtworkYear("Turksib", 1970); // Убрали дефис
+        repo.updateArtworkYear("starry sky", 1889);
 
     }
 }
