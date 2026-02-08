@@ -21,13 +21,12 @@ public class ArtApiServer {
     }
 
     static class ArtistHandler implements HttpHandler {
-        // DIP: зависим от интерфейса, а не от реализации
         private IArtworkRepository repo = new ArtworkRepository();
         private Gson gson = new Gson();
 
         @Override
         public void handle(HttpExchange exchange) throws IOException {
-            // Настройка CORS для синхронизации с Frontend [cite: 18]
+
             exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
             exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
             exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
@@ -54,7 +53,7 @@ public class ArtApiServer {
             InputStream is = exchange.getRequestBody();
             String body = new String(is.readAllBytes(), StandardCharsets.UTF_8);
 
-            // Используем Generics и JSON для обработки данных [cite: 17, 21]
+
             ArtworkRequest req = gson.fromJson(body, ArtworkRequest.class);
             repo.addArtwork(req.title, req.year, req.artistId);
 
@@ -72,9 +71,9 @@ public class ArtApiServer {
     }
 }
 
-// Вспомогательный класс для JSON (DTO) [cite: 25]
+
 class ArtworkRequest {
     String title;
     int year;
-    int artistId; // Убедись, что в JS поле называется также
+    int artistId;
 }
