@@ -13,7 +13,6 @@ public class Artist {
         this.style = style;
     }
 
-    // Getters
     public int getId() { return id; }
     public String getName() { return name; }
     public String getStyle() { return style; }
@@ -33,9 +32,9 @@ public class Artist {
     public int hashCode() { return Objects.hash(id, name); }
 }
 
-// Painting.java (Демонстрация Inheritance)
+
 class Painting extends Artwork {
-    private String medium; // масло, акварель и т.д.
+    private String medium;
 
     public Painting(String title, int year, Artist artist, String medium) {
         super(title, year, artist);
