@@ -3,65 +3,51 @@ package Art.Exhibition.Managemen;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class ArtworkRepository {
+public class ArtworkRepository implements IArtworkRepository {
 
-    public void addArtist(Artist artist) {
-        String sql = "INSERT INTO artists (name, style) VALUES (?, ?)";
-
+    @Override
+    public void addArtwork(String title, int year, int artistId) {
+        String sql = "INSERT INTO artworks (title, year, artist_id) VALUES (?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setString(1, artist.getName());
-            pstmt.setString(2, artist.getStyle());
+            pstmt.setString(1, title);
+            pstmt.setInt(2, year);
+            pstmt.setInt(3, artistId);
             pstmt.executeUpdate();
-
-            System.out.println("Artist saved successfully!");
-
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.printStackTrace(); // Теперь ошибка будет видна в консоли IntelliJ IDEA
+            throw new DatabaseException("Error saving artwork", e);
         }
     }
 
-    public void showAllArtworks() {
-        String sql = "SELECT a.title, a.year, art.name FROM artworks a JOIN artists art ON a.artist_id = art.id";
+    @Override
+    public List<Artist> getAllArtists() {
+        List<Artist> artists = new ArrayList<>();
+        String sql = "SELECT * FROM artists";
+
         try (Connection conn = DatabaseConnection.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
-                System.out.println(rs.getString("title") + " | " +
-                        rs.getInt("year") + " | By: " +
-                        rs.getString("name"));
+                Artist artist = new ArtistBuilder()
+                        .setId(rs.getInt("id"))
+                        .setName(rs.getString("name"))
+                        .setStyle(rs.getString("style"))
+                        .build();
+                artists.add(artist);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DatabaseException("Failed to retrieve artists", e);
         }
+        return artists;
     }
 
-    public void updateArtworkYear(String title, int newYear) {
-        String sql = "UPDATE artworks SET year = ? WHERE title = ?";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, newYear);
-            pstmt.setString(2, title);
-            int affectedRows = pstmt.executeUpdate();
-            System.out.println("Updated " + affectedRows + " rows.");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void deleteArtist(String name) {
-        String sql = "DELETE FROM artists WHERE name = ?";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, name);
-            pstmt.executeUpdate();
-            System.out.println("Artist " + name + " deleted.");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    public List<Artist> filterArtistsByStyle(String style) {
+        return getAllArtists().stream()
+                .filter(a -> a.getStyle().equalsIgnoreCase(style))
+                .collect(Collectors.toList());
     }
 }
-//rrrrrr

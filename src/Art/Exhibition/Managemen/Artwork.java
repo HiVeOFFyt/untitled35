@@ -33,4 +33,12 @@ public abstract class Artwork {
     public int hashCode() {
         return Objects.hash(title, year);
     }
+    class ArtworkFactory {
+        public static Artwork createArtwork(String type, String title, int year, Artist artist) {
+            if (type.equalsIgnoreCase("painting")) {
+                return new Painting(title, year, artist, "Oil");
+            }
+            return null;
+        }
+    }
 }

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Art Gallery Management</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 40px; background-color: #f0f2f5; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1 { color: #1a1a1a; text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border: 1px solid #e0e0e0; text-align: left; }
+        th { background-color: #343a40; color: white; }
+        tr:nth-child(even) { background-color: #f8f9fa; }
+        button { padding: 10px 20px; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 4px; font-weight: bold; }
+        button:hover { background: #218838; }
+        .form-group { background: #fff; padding: 20px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 20px; }
+        input { padding: 8px; margin-right: 10px; border: 1px solid #ccc; border-radius: 4px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Список художников галереи</h1>
+
+    <div class="form-group">
+        <h3>Добавить новое произведение</h3>
+        <input type="text" id="title" placeholder="Название картины"/>
+        <input type="number" id="year" placeholder="Год"/>
+        <input type="number" id="artistId" placeholder="ID художника"/>
+        <button onclick="addArtwork()">Добавить</button>
+    </div>
+
+    <button onclick="loadArtists()">Обновить список художников</button>
+
+    <table id="artistTable">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Имя</th>
+            <th>Стиль</th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    const API_URL = 'http://localhost:8080/api/artists';
+
+    async function loadArtists() {
+        console.log("Загрузка данных...");
+        try {
+            const response = await fetch(API_URL);
+            if (!response.ok) throw new Error('Ошибка сети');
+
+            const artists = await response.json();
+            console.log("Получены данные:", artists);
+
+            const tbody = document.querySelector('#artistTable tbody');
+            tbody.innerHTML = '';
+
+            if (artists.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center">Список пуст</td></tr>';
+                return;
+            }
+
+            artists.forEach(artist => {
+                const row = `<tr>
+                        <td>${artist.id}</td>
+                        <td>${artist.name}</td>
+                        <td>${artist.style}</td>
+                    </tr>`;
+                tbody.innerHTML += row;
+            });
+        } catch (error) {
+            console.error('Ошибка:', error);
+            alert('Не удалось загрузить данные. Проверьте, запущен ли сервер!');
+        }
+    }
+
+    async function addArtwork() {
+        const title = document.getElementById('title').value;
+        const year = document.getElementById('year').value;
+        const artistId = document.getElementById('artistId').value;
+
+        if(!title || !year || !artistId) {
+            alert("Заполните все поля!");
+            return;
+        }
+
+        const data = {
+            title: title,
+            year: parseInt(year),
+            artistId: parseInt(artistId)
+        };
+
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                alert('Произведение добавлено!');
+                loadArtists();
+            } else {
+                alert('Ошибка при добавлении');
+            }
+        } catch (error) {
+            console.error('Ошибка POST:', error);
+        }
+    }
+
+    // Автоматическая загрузка при открытии
+    window.onload = loadArtists;
+</script>
+</body>
+</html>
